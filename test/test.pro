@@ -38,27 +38,29 @@ unix {
         LIBS += -losgd
         LIBS += -losgViewerd
         LIBS += -losgDBd
+        LIBS += -losgGAd
         LIBS += -lOpenThreadsd
 
         LIBS += -lopenvr_api
 
-        LIBS += -L../../lib -losgOpenVRViewer_d
+        LIBS += -L../../lib -losgVRViewer_d
 
     } else {
 
         LIBS +=  -losg
         LIBS +=  -losgViewer
         LIBS +=  -losgDB
+        LIBS += -losgGA
         LIBS +=  -lOpenThreads
 
         LIBS += -lopenvr_api
 
-        LIBS += -L../../lib -losgOpenVRViewer
+        LIBS += -L../../lib -losgVRViewer
     }
 }
 
 INCLUDEPATH += ./include
-INCLUDEPATH += ../viewer/include
+INCLUDEPATH += ../osgvrviewer/include
 
 HEADERS += $$files(./include/*.h)
 SOURCES += $$files(./src/*.cpp)

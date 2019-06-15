@@ -1,6 +1,6 @@
 TEMPLATE = lib
 
-TARGET = osgOpenVRViewer
+TARGET = osgVRViewer
 
 DESTDIR = ../../lib
 
@@ -37,17 +37,15 @@ unix {
 
         LIBS += -losgd
         LIBS += -losgViewerd
-        LIBS += -losgDBd
         LIBS += -lOpenThreadsd
 
         LIBS += -lopenvr_api
 
     } else {
 
-        LIBS +=  -losg
-        LIBS +=  -losgViewer
-        LIBS +=  -losgDB
-        LIBS +=  -lOpenThreads
+        LIBS += -losg
+        LIBS += -losgViewer
+        LIBS += -lOpenThreads
 
         LIBS += -lopenvr_api
     }

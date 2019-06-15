@@ -2,5 +2,5 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-SUBDIRS += ./viewer
+SUBDIRS += ./osgvrviewer
 SUBDIRS += ./test
