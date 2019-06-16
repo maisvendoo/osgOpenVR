@@ -5,9 +5,13 @@
  *      Author: Chris Denham
  */
 
-#include "openvrupdateslavecallback.h"
+#include    "openvrupdateslavecallback.h"
 
-void OpenVRUpdateSlaveCallback::updateSlave(osg::View& view, osg::View::Slave& slave)
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+void OpenVRUpdateSlaveCallback::updateSlave(osg::View &view,
+                                            osg::View::Slave &slave)
 {
 	if (m_cameraType == LEFT_CAMERA)
 	{
@@ -17,7 +21,8 @@ void OpenVRUpdateSlaveCallback::updateSlave(osg::View& view, osg::View::Slave& s
 	osg::Vec3 position = m_device->position();
 	osg::Quat orientation = m_device->orientation();
 
-	osg::Matrix viewOffset = (m_cameraType == LEFT_CAMERA) ? m_device->viewMatrixLeft() : m_device->viewMatrixRight();
+    osg::Matrix viewOffset = (m_cameraType == LEFT_CAMERA) ?
+                m_device->viewMatrixLeft() : m_device->viewMatrixRight();
 
 	viewOffset.preMultRotate(orientation);
 	viewOffset.setTrans(viewOffset.getTrans() + position);

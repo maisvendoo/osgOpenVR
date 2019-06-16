@@ -6,20 +6,23 @@
  *
  */
 
-#include "openvrdevice.h"
+#include    "openvrdevice.h"
 
 #ifdef _WIN32
 	#include <Windows.h>
 #endif
 
-#include <osg/Geometry>
-#include <osgViewer/Renderer>
-#include <osgViewer/GraphicsWindow>
+#include    <osg/Geometry>
+#include    <osgViewer/Renderer>
+#include    <osgViewer/GraphicsWindow>
 
 #ifndef GL_TEXTURE_MAX_LEVEL
 	#define GL_TEXTURE_MAX_LEVEL 0x813D
 #endif
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 static const OSG_GLExtensions* getGLExtensions(const osg::State& state)
 {
 #if(OSG_VERSION_GREATER_OR_EQUAL(3, 4, 0))
@@ -29,6 +32,9 @@ static const OSG_GLExtensions* getGLExtensions(const osg::State& state)
 #endif
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 static const OSG_Texture_Extensions* getTextureExtensions(const osg::State& state)
 {
 #if(OSG_VERSION_GREATER_OR_EQUAL(3, 4, 0))
@@ -38,6 +44,9 @@ static const OSG_Texture_Extensions* getTextureExtensions(const osg::State& stat
 #endif
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 static osg::Matrix convertMatrix34(const vr::HmdMatrix34_t &mat34)
 {
 	osg::Matrix matrix(
@@ -49,6 +58,9 @@ static osg::Matrix convertMatrix34(const vr::HmdMatrix34_t &mat34)
 	return matrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 static osg::Matrix convertMatrix44(const vr::HmdMatrix44_t &mat44)
 {
 	osg::Matrix matrix(
@@ -60,18 +72,29 @@ static osg::Matrix convertMatrix44(const vr::HmdMatrix44_t &mat44)
 	return matrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRPreDrawCallback::operator()(osg::RenderInfo& renderInfo) const
 {
 	m_textureBuffer->onPreRender(renderInfo);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRPostDrawCallback::operator()(osg::RenderInfo& renderInfo) const
 {
 	m_textureBuffer->onPostRender(renderInfo);
 }
 
-/* Public functions */
-OpenVRTextureBuffer::OpenVRTextureBuffer(osg::ref_ptr<osg::State> state, int width, int height, int samples) :
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+OpenVRTextureBuffer::OpenVRTextureBuffer(osg::ref_ptr<osg::State> state,
+                                         int width,
+                                         int height,
+                                         int samples) :
 	m_Resolve_FBO(0),
 	m_Resolve_ColorTex(0),
 	m_MSAA_FBO(0),
@@ -129,6 +152,9 @@ OpenVRTextureBuffer::OpenVRTextureBuffer(osg::ref_ptr<osg::State> state, int wid
 
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRTextureBuffer::onPreRender(osg::RenderInfo& renderInfo)
 {
 	osg::State& state = *renderInfo.getState();
@@ -139,6 +165,9 @@ void OpenVRTextureBuffer::onPreRender(osg::RenderInfo& renderInfo)
 	fbo_ext->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_DepthTex, 0);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRTextureBuffer::onPostRender(osg::RenderInfo& renderInfo)
 {
 	osg::State& state = *renderInfo.getState();
@@ -158,6 +187,9 @@ void OpenVRTextureBuffer::onPostRender(osg::RenderInfo& renderInfo)
 	fbo_ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRTextureBuffer::destroy(osg::GraphicsContext* gc)
 {
 	const OSG_GLExtensions* fbo_ext = getGLExtensions(*gc->getState());
@@ -168,7 +200,12 @@ void OpenVRTextureBuffer::destroy(osg::GraphicsContext* gc)
 	}
 }
 
-OpenVRMirrorTexture::OpenVRMirrorTexture(osg::ref_ptr<osg::State> state, GLint width, GLint height) : 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+OpenVRMirrorTexture::OpenVRMirrorTexture(osg::ref_ptr<osg::State> state,
+                                         GLint width,
+                                         GLint height) :
 	m_width(width),
 	m_height(height)
 {
@@ -187,10 +224,14 @@ OpenVRMirrorTexture::OpenVRMirrorTexture(osg::ref_ptr<osg::State> state, GLint w
 	fbo_ext->glFramebufferTexture2D(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_mirrorTex, 0);
 	fbo_ext->glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
 	fbo_ext->glBindFramebuffer(GL_READ_FRAMEBUFFER_EXT, 0);
-
 }
 
-void OpenVRMirrorTexture::blitTexture(osg::GraphicsContext* gc, OpenVRTextureBuffer* leftEye,  OpenVRTextureBuffer* rightEye)
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+void OpenVRMirrorTexture::blitTexture(osg::GraphicsContext* gc,
+                                      OpenVRTextureBuffer* leftEye,
+                                      OpenVRTextureBuffer* rightEye)
 {
 	const OSG_GLExtensions* fbo_ext = getGLExtensions(*(gc->getState()));
 
@@ -243,13 +284,19 @@ void OpenVRMirrorTexture::destroy(osg::GraphicsContext* gc)
 	}
 }
 
-OpenVRDevice::OpenVRDevice(float nearClip, float farClip, const float worldUnitsPerMetre, const int samples) :
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+OpenVRDevice::OpenVRDevice(float nearClip,
+                           float farClip,
+                           const float worldUnitsPerMetre,
+                           const int samples) :
 	m_vrSystem(nullptr),
 	m_vrRenderModels(nullptr),
 	m_worldUnitsPerMetre(worldUnitsPerMetre),
 	m_mirrorTexture(nullptr),
 	m_position(osg::Vec3(0.0f, 0.0f, 0.0f)),
-	m_orientation(osg::Quat(0.0f, 0.0f, 0.0f, 1.0f)),
+    m_orientation(osg::Quat(0.0, 0.0, 0.0, 1.0)),
 	m_nearClip(nearClip), m_farClip(farClip),
 	m_samples(samples)
 {
@@ -281,24 +328,38 @@ OpenVRDevice::OpenVRDevice(float nearClip, float farClip, const float worldUnits
 		return;
 	}
 
-	m_vrRenderModels = (vr::IVRRenderModels *)vr::VR_GetGenericInterface(vr::IVRRenderModels_Version, &eError);
+    m_vrRenderModels = static_cast<vr::IVRRenderModels *>(vr::VR_GetGenericInterface(vr::IVRRenderModels_Version, &eError));
+
 	if (m_vrRenderModels == nullptr)
 	{
 		m_vrSystem = nullptr;
 		vr::VR_Shutdown();
+
 		osg::notify(osg::WARN) 
 			<< "Error: Unable to get render model interface!\n"
-			<< "Reason: " << vr::VR_GetVRInitErrorAsEnglishDescription( eError ) << std::endl;
+            << "Reason: " << vr::VR_GetVRInitErrorAsEnglishDescription(eError)
+            << std::endl;
+
 		return;
 	}
 
 	std::string driverName = GetDeviceProperty(vr::Prop_TrackingSystemName_String);
 	std::string deviceSerialNumber = GetDeviceProperty(vr::Prop_SerialNumber_String);
 
-	osg::notify(osg::NOTICE) << "HMD driver name: "<< driverName << std::endl;
-	osg::notify(osg::NOTICE) << "HMD device serial number: " << deviceSerialNumber << std::endl;
+    osg::notify(osg::NOTICE)
+            << "HMD driver name: "
+            << driverName
+            << std::endl;
+
+    osg::notify(osg::NOTICE)
+            << "HMD device serial number: "
+            << deviceSerialNumber
+            << std::endl;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 std::string OpenVRDevice::GetDeviceProperty(vr::TrackedDeviceProperty prop)
 {
 	uint32_t bufferLen = m_vrSystem->GetStringTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, prop, NULL, 0);
@@ -314,6 +375,9 @@ std::string OpenVRDevice::GetDeviceProperty(vr::TrackedDeviceProperty prop)
 	return result;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::createRenderBuffers(osg::ref_ptr<osg::State> state)
 {
 	uint32_t renderWidth = 0;
@@ -330,22 +394,34 @@ void OpenVRDevice::createRenderBuffers(osg::ref_ptr<osg::State> state)
 	m_mirrorTexture = new OpenVRMirrorTexture(state, mirrorWidth, mirrorHeight);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::init()
 {
 	calculateEyeAdjustment();
 	calculateProjectionMatrices();
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 bool OpenVRDevice::hmdPresent()
 {
 	return vr::VR_IsHmdPresent();
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 bool OpenVRDevice::hmdInitialized() const
 {
 	return m_vrSystem != nullptr && m_vrRenderModels != nullptr;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::projectionMatrixCenter() const
 {
 	osg::Matrix projectionMatrixCenter;
@@ -353,16 +429,25 @@ osg::Matrix OpenVRDevice::projectionMatrixCenter() const
 	return projectionMatrixCenter;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::projectionMatrixLeft() const
 {
 	return m_leftEyeProjectionMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::projectionMatrixRight() const
 {
 	return m_rightEyeProjectionMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::projectionOffsetMatrixLeft() const
 {
 	osg::Matrix projectionOffsetMatrix;
@@ -371,6 +456,9 @@ osg::Matrix OpenVRDevice::projectionOffsetMatrixLeft() const
 	return projectionOffsetMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::projectionOffsetMatrixRight() const
 {
 	osg::Matrix projectionOffsetMatrix;
@@ -379,6 +467,9 @@ osg::Matrix OpenVRDevice::projectionOffsetMatrixRight() const
 	return projectionOffsetMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::viewMatrixLeft() const
 {
 	osg::Matrix viewMatrix;
@@ -386,6 +477,9 @@ osg::Matrix OpenVRDevice::viewMatrixLeft() const
 	return viewMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::Matrix OpenVRDevice::viewMatrixRight() const
 {
 	osg::Matrix viewMatrix;
@@ -393,11 +487,17 @@ osg::Matrix OpenVRDevice::viewMatrixRight() const
 	return viewMatrix;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::resetSensorOrientation() const
 {
 	m_vrSystem->ResetSeatedZeroPose();
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::updatePose()
 {
 	vr::VRCompositor()->SetTrackingSpace(vr::TrackingUniverseSeated);
@@ -421,14 +521,19 @@ void OpenVRDevice::updatePose()
 
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 class OpenVRInitialDrawCallback : public osg::Camera::DrawCallback
 {
 public:
+
 	virtual void operator()(osg::RenderInfo& renderInfo) const
 	{
 		osg::GraphicsOperation* graphicsOperation = renderInfo.getCurrentCamera()->getRenderer();
 		osgViewer::Renderer* renderer = dynamic_cast<osgViewer::Renderer*>(graphicsOperation);
-		if (renderer != nullptr)
+
+        if (renderer != nullptr)
 		{
 			// Disable normal OSG FBO camera setup because it will undo the MSAA FBO configuration.
 			renderer->setCameraRequiresSetUp(false);
@@ -436,7 +541,13 @@ public:
 	}
 };
 
-osg::Camera* OpenVRDevice::createRTTCamera(OpenVRDevice::Eye eye, osg::Transform::ReferenceFrame referenceFrame, const osg::Vec4& clearColor, osg::GraphicsContext* gc) const
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+osg::Camera* OpenVRDevice::createRTTCamera(OpenVRDevice::Eye eye,
+                                           osg::Transform::ReferenceFrame referenceFrame,
+                                           const osg::Vec4& clearColor,
+                                           osg::GraphicsContext* gc) const
 {
 	OpenVRTextureBuffer* buffer = m_textureBuffer[eye];
 
@@ -465,6 +576,9 @@ osg::Camera* OpenVRDevice::createRTTCamera(OpenVRDevice::Eye eye, osg::Transform
 	return camera.release();
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 bool OpenVRDevice::submitFrame()
 {
     vr::Texture_t leftEyeTexture = {(void*)m_textureBuffer[0]->getTexture(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
@@ -476,11 +590,17 @@ bool OpenVRDevice::submitFrame()
 	return lError == vr::VRCompositorError_None && rError == vr::VRCompositorError_None;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::blitMirrorTexture(osg::GraphicsContext* gc)
 {
 	m_mirrorTexture->blitTexture(gc, m_textureBuffer[0], m_textureBuffer[1]);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 osg::GraphicsContext::Traits* OpenVRDevice::graphicsContextTraits() const
 {
 	osg::GraphicsContext::WindowingSystemInterface* wsi = osg::GraphicsContext::getWindowingSystemInterface();
@@ -488,7 +608,7 @@ osg::GraphicsContext::Traits* OpenVRDevice::graphicsContextTraits() const
 	if (!wsi)
 	{
 		osg::notify(osg::NOTICE) << "Error, no WindowSystemInterface available, cannot create windows." << std::endl;
-		return 0;
+        return nullptr;
 	}
 
 	// Get the screen identifiers set in environment variable DISPLAY
@@ -528,6 +648,9 @@ osg::GraphicsContext::Traits* OpenVRDevice::graphicsContextTraits() const
 	return traits.release();
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::shutdown(osg::GraphicsContext* gc)
 {
 	// Delete mirror texture
@@ -555,12 +678,17 @@ void OpenVRDevice::shutdown(osg::GraphicsContext* gc)
 
 }
 
-/* Protected functions */
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 OpenVRDevice::~OpenVRDevice()
 {
 	// shutdown(gc);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::calculateEyeAdjustment()
 {
 	vr::HmdMatrix34_t mat;
@@ -579,6 +707,9 @@ void OpenVRDevice::calculateEyeAdjustment()
 	m_rightEyeAdjust *= m_worldUnitsPerMetre;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::calculateProjectionMatrices()
 {
 	vr::HmdMatrix44_t mat;
@@ -590,6 +721,9 @@ void OpenVRDevice::calculateProjectionMatrices()
 	m_rightEyeProjectionMatrix = convertMatrix44(mat);
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRDevice::trySetProcessAsHighPriority() const
 {
 	// Require at least 4 processors, otherwise the process could occupy the machine.
@@ -601,6 +735,9 @@ void OpenVRDevice::trySetProcessAsHighPriority() const
 	}
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRRealizeOperation::operator() (osg::GraphicsContext* gc)
 {
 	if (!m_realized)
@@ -623,6 +760,9 @@ void OpenVRRealizeOperation::operator() (osg::GraphicsContext* gc)
 	m_realized = true;
 }
 
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRSwapCallback::swapBuffersImplementation(osg::GraphicsContext* gc)
 {
 	// Submit rendered frame to compositor

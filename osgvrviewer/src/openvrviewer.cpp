@@ -5,10 +5,12 @@
  *      Author: Chris Denham
  */
 
-#include "openvrviewer.h"
-#include "openvrupdateslavecallback.h"
+#include    "openvrviewer.h"
+#include    "openvrupdateslavecallback.h"
 
-/* Public functions */
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRViewer::traverse(osg::NodeVisitor& nv)
 {
 	// Must be realized before any traversal
@@ -20,7 +22,9 @@ void OpenVRViewer::traverse(osg::NodeVisitor& nv)
 	osg::Group::traverse(nv);
 }
 
-/* Protected functions */
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
 void OpenVRViewer::configure()
 {
 	osg::ref_ptr<osg::GraphicsContext> gc =  m_view->getCamera()->getGraphicsContext();
@@ -35,6 +39,7 @@ void OpenVRViewer::configure()
 
 	// master projection matrix
 	camera->setProjectionMatrix(m_device->projectionMatrixCenter());
+
 	// Create RTT cameras and attach textures
 	m_cameraRTTLeft = m_device->createRTTCamera(OpenVRDevice::LEFT, osg::Camera::RELATIVE_RF, clearColor, gc);
 	m_cameraRTTRight = m_device->createRTTCamera(OpenVRDevice::RIGHT, osg::Camera::RELATIVE_RF, clearColor, gc);
@@ -46,13 +51,15 @@ void OpenVRViewer::configure()
 					 m_device->projectionOffsetMatrixLeft(),
 					 m_device->viewMatrixLeft(),
 					 true);
-	m_view->getSlave(0)._updateSlaveCallback = new OpenVRUpdateSlaveCallback(OpenVRUpdateSlaveCallback::LEFT_CAMERA, m_device.get(), swapCallback.get());
+
+    m_view->getSlave(0)._updateSlaveCallback = new OpenVRUpdateSlaveCallback(OpenVRUpdateSlaveCallback::LEFT_CAMERA, m_device.get(), swapCallback.get());
 
 	m_view->addSlave(m_cameraRTTRight.get(),
 					 m_device->projectionOffsetMatrixRight(),
 					 m_device->viewMatrixRight(),
 					 true);
-	m_view->getSlave(1)._updateSlaveCallback = new OpenVRUpdateSlaveCallback(OpenVRUpdateSlaveCallback::RIGHT_CAMERA, m_device.get(), swapCallback.get());
+
+    m_view->getSlave(1)._updateSlaveCallback = new OpenVRUpdateSlaveCallback(OpenVRUpdateSlaveCallback::RIGHT_CAMERA, m_device.get(), swapCallback.get());
 
 	// Use sky light instead of headlight to avoid light changes when head movements
 	m_view->setLightingMode(osg::View::SKY_LIGHT);
